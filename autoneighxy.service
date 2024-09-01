@@ -1,0 +1,6 @@
+[Unit]
+Description=Auto IPv6 Neighbor Proxy
+
+[Service]
+ExecStart=/home/piernov/autoneighxy/autoneighxy.py
+

@@ -25,7 +25,7 @@ class NeighTableIface(dict):
         # Neighbor proxies
         self.proxies = None
         # Routes to hosts
-        self.host_routes = None
+#        self.host_routes = None
         self.reload()
 
     def reload(self):
@@ -44,9 +44,9 @@ class NeighTableIface(dict):
         self.proxies = set()
         for _, ip in ipcmd.list_neigh_proxy(iface=self.iface):
             self.proxies.add(ip)
-        self.host_routes = set()
-        for _, ip in ipcmd.list_host_routes(iface=self.iface):
-            self.host_routes.add(ip)
+#        self.host_routes = set()
+#        for _, ip in ipcmd.list_host_routes(iface=self.iface):
+#            self.host_routes.add(ip)
 
     def dump(self):
         """Dump content for debugging purpose"""
@@ -54,8 +54,8 @@ class NeighTableIface(dict):
             yield '{0} @ {1}_{2}'.format(ip, self.iface, hw)
         for ip in self.proxies:
             yield '{0} @ {1}_PROXY'.format(ip, self.iface)
-        for ip in self.host_routes:
-            yield 'Route:{0} @ {1}'.format(ip, self.iface)
+#        for ip in self.host_routes:
+#            yield 'Route:{0} @ {1}'.format(ip, self.iface)
 
     def update(self, ip, hw):
         """Update a neighbor entry
@@ -81,8 +81,8 @@ class NeighTableIface(dict):
         self[ip] = hw
         if ip in self.proxies:
             self.del_neigh_proxy(ip)
-        if ip not in self.host_routes:
-            self.add_host_route(ip)
+#        if ip not in self.host_routes:
+#            self.add_host_route(ip)
         return True
 
     def remove_neigh(self, ip):
@@ -95,7 +95,7 @@ class NeighTableIface(dict):
             ipcmd.del_neigh(self.iface, ip)
         except ipcmd.IpCmdError:
             pass
-        self.del_host_route(ip)
+#        self.del_host_route(ip)
         if ip in self:
             del self[ip]
 
@@ -136,41 +136,41 @@ class NeighTableIface(dict):
             ipcmd.del_neigh_proxy(self.iface, ip)
         self.proxies.discard(ip)
 
-    def add_host_route(self, ip):
-        """Add a route to an host"""
-        if ip not in self.host_routes:
-            logger.info("Add Host Route {0} @ {1}".format(ip, self.iface))
-        try:
-            ipcmd.add_route(self.iface, ip)
-        except ipcmd.IpCmdError:
-            # Failure is normal if the proxy already existed
-            if ip in self.host_routes:
-                return
-            # Reload tables
-            self.reload()
-            if ip in self.host_routes:
-                return
-            # Let's try again, and failure goes up this time
-            ipcmd.add_route(self.iface, ip)
-        self.host_routes.add(ip)
+#    def add_host_route(self, ip):
+#        """Add a route to an host"""
+#        if ip not in self.host_routes:
+#            logger.info("Add Host Route {0} @ {1}".format(ip, self.iface))
+#        try:
+#            ipcmd.add_route(self.iface, ip)
+#        except ipcmd.IpCmdError:
+#            # Failure is normal if the proxy already existed
+#            if ip in self.host_routes:
+#                return
+#            # Reload tables
+#            self.reload()
+#            if ip in self.host_routes:
+#                return
+#            # Let's try again, and failure goes up this time
+#            ipcmd.add_route(self.iface, ip)
+#        self.host_routes.add(ip)
 
-    def del_host_route(self, ip):
-        """Delete a neighbor proxy"""
-        if ip in self.host_routes:
-            logger.info("Delete Host Route {0} @ {1}".format(ip, self.iface))
-        try:
-            ipcmd.del_route(self.iface, ip)
-        except ipcmd.IpCmdError:
-            # Failure is normal if the host route did not exist
-            if ip not in self.host_routes:
-                return
-            # Reload tables
-            self.reload()
-            if ip not in self.host_routes:
-                return
-            # Let's try again, and failure goes up this time
-            ipcmd.del_route(self.iface, ip)
-        self.host_routes.discard(ip)
+#    def del_host_route(self, ip):
+#        """Delete a neighbor proxy"""
+#        if ip in self.host_routes:
+#            logger.info("Delete Host Route {0} @ {1}".format(ip, self.iface))
+#        try:
+#            ipcmd.del_route(self.iface, ip)
+#        except ipcmd.IpCmdError:
+#            # Failure is normal if the host route did not exist
+#            if ip not in self.host_routes:
+#                return
+#            # Reload tables
+#            self.reload()
+#            if ip not in self.host_routes:
+#                return
+#            # Let's try again, and failure goes up this time
+#            ipcmd.del_route(self.iface, ip)
+#        self.host_routes.discard(ip)
 
 
 class NeighTable(dict):
@@ -247,12 +247,12 @@ class NeighTable(dict):
                 if ip in entries.proxies:
                     entries.del_neigh_proxy(ip)
                 # Add host routes
-                if ip not in entries.host_routes:
-                    entries.add_host_route(ip)
+#                if ip not in entries.host_routes:
+#                    entries.add_host_route(ip)
             # Remove no-longer existing host routes
-            for ip in list(entries.host_routes):
-                if ip not in entries:
-                    entries.del_host_route(ip)
+#            for ip in list(entries.host_routes):
+#                if ip not in entries:
+#                    entries.del_host_route(ip)
             # Remove proxy entries which no longer matches a neighbor
             for ip in list(entries.proxies):
                 if all([ip not in e for e in self.values()]):

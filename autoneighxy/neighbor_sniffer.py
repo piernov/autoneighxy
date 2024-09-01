@@ -60,28 +60,28 @@ class NeighborSniffer(object):
         """Update a neighbor entry"""
         return self.neigh.update(iface, ip, hw, update_proxy=True)
 
-    def process_arp_packet(self, iface, pkt):
-        """Process a received ARP packet
+#    def process_arp_packet(self, iface, pkt):
+#        """Process a received ARP packet
 
-        Usual ARP messages are in one of these format:
-            ARP who has {pdst}, tells {psrc}/{hwsrc}
-            ARP is at {hwsrc} says {psrc}, to {pdst}/{hwdst}
-        """
-        arppkt = pkt[ARP]
+#        Usual ARP messages are in one of these format:
+#            ARP who has {pdst}, tells {psrc}/{hwsrc}
+#            ARP is at {hwsrc} says {psrc}, to {pdst}/{hwdst}
+#        """
+#        arppkt = pkt[ARP]
 
         # There is a host behind iface which is using psrc/hwsrc
-        self.update_neigh(iface, arppkt.psrc, arppkt.hwsrc)
+#        self.update_neigh(iface, arppkt.psrc, arppkt.hwsrc)
 
         # Process dynamic updates with ARP is-at
-        if arppkt.op == ARP.who_has:
-            if LOG_NETWORK_PACKETS:
-                logger.debug("[{0}] ARP who has {1} ?"
-                             .format(iface, arppkt.pdst))
-        elif arppkt.op == ARP.is_at:
-            if LOG_NETWORK_PACKETS:
-                logger.debug("[{0}] ARP {1} is at {2}"
-                             .format(iface, arppkt.psrc, arppkt.hwsrc))
-            self.update_neigh(iface, arppkt.pdst, arppkt.hwdst)
+#        if arppkt.op == ARP.who_has:
+#            if LOG_NETWORK_PACKETS:
+#                logger.debug("[{0}] ARP who has {1} ?"
+#                             .format(iface, arppkt.pdst))
+#        elif arppkt.op == ARP.is_at:
+#            if LOG_NETWORK_PACKETS:
+#                logger.debug("[{0}] ARP {1} is at {2}"
+#                             .format(iface, arppkt.psrc, arppkt.hwsrc))
+#            self.update_neigh(iface, arppkt.pdst, arppkt.hwdst)
 
     def process_icmpv6_packet(self, iface, pkt):
         """Process a received ICMPv6 packet
@@ -170,8 +170,8 @@ class NeighborSniffer(object):
                         pkt = s.recv(MTU)
                         if pkt is None or Ether not in pkt:
                             continue
-                        elif ARP in pkt:
-                            self.process_arp_packet(iface, pkt)
+#                        elif ARP in pkt:
+#                            self.process_arp_packet(iface, pkt)
                         elif IPv6 in pkt:
                             self.process_icmpv6_packet(iface, pkt)
 

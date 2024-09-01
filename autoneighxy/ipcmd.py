@@ -49,20 +49,20 @@ def list_neigh(iface=None):
     """
     cmdline = ['dev', iface] if iface else []
     neigh = []
-    for line in _run_show_command(['ip', 'neigh', 'show'] + cmdline):
+    for line in _run_show_command(['ip', '-6', 'neigh', 'show'] + cmdline):
         matches = re.match(
             r'^(?P<ip>\S+)( dev (?P<if>\S+))?.* lladdr (?P<hw>\S+)', line)
         if matches is not None:
             iff, ipaddr, hwaddr = matches.group('if', 'ip', 'hw')
             neigh.append((iff or iface, ipaddr, hwaddr))
-        elif 'FAILED' not in line:
+        elif 'FAILED' not in line and 'INCOMPLETE' not in line:
             raise IpCmdError("Unexpected line: " + line)
     return neigh
 
 
 def del_neigh(iface, ip):
     """Remove a neighbor"""
-    _run_do_command(['ip', 'neigh', 'del', ip, 'dev', iface])
+    _run_do_command(['ip', '-6', 'neigh', 'del', ip, 'dev', iface])
 
 
 def list_neigh_proxy(iface=None):
@@ -72,7 +72,7 @@ def list_neigh_proxy(iface=None):
     """
     cmdline = ['dev', iface] if iface else []
     neigh = []
-    for line in _run_show_command(['ip', 'neigh', 'show', 'proxy'] + cmdline):
+    for line in _run_show_command(['ip', '-6', 'neigh', 'show', 'proxy'] + cmdline):
         matches = re.match(r'^(?P<ip>\S+)( dev (?P<if>\S+))?', line)
         if matches is not None:
             iff, ipaddr = matches.group('if', 'ip')
@@ -85,7 +85,7 @@ def list_neigh_proxy(iface=None):
 def add_neigh_proxy(iface, ip):
     """Add a neighbor proxy"""
     try:
-        _run_do_command(['ip', 'neigh', 'add', 'proxy', ip, 'dev', iface])
+        _run_do_command(['ip', '-6', 'neigh', 'add', 'proxy', ip, 'dev', iface])
     except IpCmdError as e:
         # Ignore already-existing neughbors
         if e.code == 2 and 'File exists' in e.message:
@@ -95,7 +95,7 @@ def add_neigh_proxy(iface, ip):
 
 def del_neigh_proxy(iface, ip):
     """Delete a neighbor proxy"""
-    _run_do_command(['ip', 'neigh', 'del', 'proxy', ip, 'dev', iface])
+    _run_do_command(['ip', '-6', 'neigh', 'del', 'proxy', ip, 'dev', iface])
 
 
 def list_host_routes(iface=None):
@@ -105,11 +105,11 @@ def list_host_routes(iface=None):
     """
     cmdline = ['dev', iface] if iface else []
     routes = []
-    for line in _run_show_command(['ip', '-4', 'route', 'show'] + cmdline):
-        matches = re.match(r'^(?P<ip>[0-9.]+) (dev (?P<if>\S+))?', line)
-        if matches is not None:
-            iff, ipaddr = matches.group('if', 'ip')
-            routes.append((iff or iface, ipaddr))
+#    for line in _run_show_command(['ip', '-4', 'route', 'show'] + cmdline):
+#        matches = re.match(r'^(?P<ip>[0-9.]+) (dev (?P<if>\S+))?', line)
+#        if matches is not None:
+#            iff, ipaddr = matches.group('if', 'ip')
+#            routes.append((iff or iface, ipaddr))
     for line in _run_show_command(['ip', '-6', 'route', 'show'] + cmdline):
         line = line.lower()
         matches = re.match(r'^(?P<ip>[0-9a-f:]+) (dev (?P<if>\S+))?', line)
@@ -123,7 +123,7 @@ def add_route(iface, ip, prefixlen=None, via=None):
     """Add a route"""
     if prefixlen is None:
         prefixlen = 128 if ':' in ip else 32
-    cmdline = ['ip', 'route', 'add', ip + '/' + str(prefixlen), 'dev', iface]
+    cmdline = ['ip', '-6', 'route', 'add', ip + '/' + str(prefixlen), 'dev', iface]
     if via:
         cmdline += ['via', via]
     try:
@@ -139,7 +139,7 @@ def del_route(iface, ip, prefixlen=None, via=None):
     """Delete a route"""
     if prefixlen is None:
         prefixlen = 128 if ':' in ip else 32
-    cmdline = ['ip', 'route', 'del', ip + '/' + str(prefixlen), 'dev', iface]
+    cmdline = ['ip', '-6', 'route', 'del', ip + '/' + str(prefixlen), 'dev', iface]
     if via:
         cmdline += ['via', via]
     _run_do_command(cmdline)
